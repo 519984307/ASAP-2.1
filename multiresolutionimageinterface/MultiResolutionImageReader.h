@@ -5,7 +5,7 @@
 #include <string>
 
 class MultiResolutionImage;
-
+//¶à·Ö±æÂÊÍ¼ÏñÔÄ¶ÁÆ÷
 class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImageReader {
 
 public:

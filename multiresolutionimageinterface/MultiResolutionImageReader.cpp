@@ -5,7 +5,7 @@
 #include "MultiResolutionImageFactory.h"
 
 using std::string;
-
+//¶à·Ö±æÂÊÍ¼ÏñÔÄ¶ÁÆ÷
 MultiResolutionImageReader::MultiResolutionImageReader()
 {
 }
