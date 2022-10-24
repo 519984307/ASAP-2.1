@@ -13,6 +13,7 @@ class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImageFactory {
 
 public:
   MultiResolutionImageFactory(const std::string& factoryName, const std::set<std::string>& supported_extensions, const unsigned int priority);
+
   static MultiResolutionImage* openImage(const std::string& fileName, const std::string factoryName = std::string("default"));
   static void registerExternalFileFormats();
   static std::vector<std::pair<std::string, std::set<std::string> > > getLoadedFactoriesAndSupportedExtensions();

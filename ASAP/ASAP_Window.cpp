@@ -302,13 +302,15 @@ void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) 
     _settings->setValue("currentFile", QFileInfo(fileName).fileName());
       //设置窗口标题为ASAP- + 文件名
     this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
-    //创建多分辨率图像读取类
+      //创建多分辨率图像读取类
     MultiResolutionImageReader imgReader;
+
     _img.reset(imgReader.open(fn, factoryName.toStdString()));
     if (_img) {
       if (_img->valid()) {
         vector<unsigned long long> dimensions = _img->getLevelDimensions(_img->getNumberOfLevels() - 1);
         PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
+        //初始化场景
         view->initialize(_img);
         emit newImageLoaded(_img, fn);
       }

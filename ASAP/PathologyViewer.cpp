@@ -59,6 +59,7 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   setInteractive(false);
   this->setScene(new QGraphicsScene); //Memleak!
   this->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
+    //场景
   this->scene()->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
@@ -233,11 +234,16 @@ void PathologyViewer::onFieldOfViewChanged(const QRectF& FOV, const unsigned int
   }
 }
 
+  //初始化
 void PathologyViewer::initialize(std::shared_ptr<MultiResolutionImage> img) {
+    //先执行关闭
   close();
+    //设置控件为可见
   setEnabled(true);
   _img = img;
+    //瓦片大小
   unsigned int tileSize = 512;
+    //最上面的层
   unsigned int lastLevel = _img->getNumberOfLevels() - 1;
   for (int i = lastLevel; i >= 0; --i) {
     std::vector<unsigned long long> lastLevelDimensions = _img->getLevelDimensions(i);
@@ -246,18 +252,33 @@ void PathologyViewer::initialize(std::shared_ptr<MultiResolutionImage> img) {
       break;
     }
   }
+    //缓存对象
   _cache = new WSITileGraphicsItemCache();
+    //设置最大缓存大小
   _cache->setMaxCacheSize(_cacheSize);
+    //线程
   _ioThread = new IOThread(this);
+    //设置背景图片
   _ioThread->setBackgroundImage(img);
+    //瓦片管理对象 img，tileSize=512， lastLevel = 最上面层，_cache=缓存对象，scene = 场景
   _manager = new TileManager(_img, tileSize, lastLevel, _ioThread, _cache, scene());
+    //此属性保存小部件是否启用了鼠标跟踪
   setMouseTracking(true);
+
   std::vector<IOWorker*> workers = _ioThread->getWorkers();
   for (int i = 0; i < workers.size(); ++i) {
-    QObject::connect(workers[i], SIGNAL(tileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, ImageSource*, QPixmap*)), _manager, SLOT(onTileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, ImageSource*, QPixmap*)));
-    QObject::connect(workers[i], SIGNAL(foregroundTileRendered(QPixmap*, unsigned int, unsigned int, unsigned int)), _manager, SLOT(onForegroundTileRendered(QPixmap*, unsigned int, unsigned int, unsigned int)));
+    QObject::connect(workers[i], 
+        SIGNAL(tileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, ImageSource*, QPixmap*)), 
+        _manager, 
+        SLOT(onTileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, ImageSource*, QPixmap*)));
+    QObject::connect(workers[i], 
+        SIGNAL(foregroundTileRendered(QPixmap*, unsigned int, unsigned int, unsigned int)), 
+        _manager, 
+        SLOT(onForegroundTileRendered(QPixmap*, unsigned int, unsigned int, unsigned int)));
   }
+    //初始化图像
   initializeImage(scene(), tileSize, lastLevel);
+    //初始化GUI组件
   initializeGUIComponents(lastLevel);
   QObject::connect(this, SIGNAL(backgroundChannelChanged(int)), _ioThread, SLOT(onBackgroundChannelChanged(int)));
   QObject::connect(_cache, SIGNAL(itemEvicted(WSITileGraphicsItem*)), _manager, SLOT(onTileRemoved(WSITileGraphicsItem*)));
@@ -309,7 +330,8 @@ void PathologyViewer::setForegroundOpacity(const float& opacity) {
 float PathologyViewer::getForegroundOpacity() const {
   return _opacity;
 }
-
+    
+  //初始化图像
 void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize, unsigned int lastLevel) {  
   unsigned int nrLevels = _img->getNumberOfLevels();
   std::vector<unsigned long long> lastLevelDimensions = _img->getLevelDimensions(lastLevel);
@@ -329,11 +351,14 @@ void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize
   while (_ioThread->numberOfJobs() > 0) {
   }
 }
-
+    
+  //初始化GUI组件 传入的是最上的一层
 void PathologyViewer::initializeGUIComponents(unsigned int level) {
-  // Initialize the minimap
+  // Initialize the minimap 初始化小地图
   std::vector<unsigned long long> overviewDimensions = _img->getLevelDimensions(level);
+    //minimap大小
   unsigned int size = overviewDimensions[0] * overviewDimensions[1] * _img->getSamplesPerPixel();
+    
   unsigned char* overview = new unsigned char[size];
   _img->getRawRegion<unsigned char>(0, 0, overviewDimensions[0], overviewDimensions[1], level, overview);
   QImage ovImg;
@@ -452,7 +477,8 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
     }
   }
 }
-
+  
+  //关闭
 void PathologyViewer::close() {
   if (this->window()) {
     QMenu* viewMenu = this->window()->findChild<QMenu*>("menuView");
@@ -477,13 +503,16 @@ void PathologyViewer::close() {
     _prefetchthread->deleteLater();
     _prefetchthread = NULL;
   }
+    //清除场景
   scene()->clear();
   if (_manager) {
+      //清除瓦片
     _manager->clear();
     delete _manager;
     _manager = NULL;
   }
   if (_cache) {
+      //清除缓存
     _cache->clear();
     delete _cache;
     _cache = NULL;

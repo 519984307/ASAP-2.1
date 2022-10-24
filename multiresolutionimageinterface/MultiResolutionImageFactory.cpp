@@ -54,8 +54,10 @@ bool MultiResolutionImageFactory::operator<(const MultiResolutionImageFactory& o
   return this->_priority < other._priority;
 }
 
+//打开图像（文件名，工厂名） 返回MultiResolutionImage
 MultiResolutionImage* MultiResolutionImageFactory::openImage(const std::string& fileName, const std::string factoryName) {
   MultiResolutionImageFactory::registerExternalFileFormats();  
+    //如果工厂名字为default
   if (factoryName == "default") {
     std::vector<MultiResolutionImageFactory*> suitableFactoriesByPriority;
     for (auto it = registry().begin(); it != registry().end(); ++it) {
@@ -65,6 +67,7 @@ MultiResolutionImage* MultiResolutionImageFactory::openImage(const std::string& 
         suitableFactoriesByPriority.push_back(it->second.second);
       }
     }
+      //排序
     std::sort(suitableFactoriesByPriority.begin(), suitableFactoriesByPriority.end(), [](MultiResolutionImageFactory* a, MultiResolutionImageFactory* b) {return (*a) < (*b);});
     for (auto it = suitableFactoriesByPriority.begin(); it != suitableFactoriesByPriority.end(); ++it) {
       MultiResolutionImage* img = MultiResolutionImageFactory::openImageWithFactory(fileName, *it);

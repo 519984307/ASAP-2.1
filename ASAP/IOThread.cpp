@@ -88,6 +88,7 @@ void IOThread::setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, f
   }
 }
 
+    //…Ë÷√±≥æ∞Õº∆¨
 void IOThread::setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img) {
   QMutexLocker locker(&_jobListMutex);
   _bck_img = bck_img;

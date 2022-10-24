@@ -30,8 +30,10 @@ public:
 
     PathologyViewer(QWidget *parent = 0);
     ~PathologyViewer();
-
+      
+      //初始化
     void initialize(std::shared_ptr<MultiResolutionImage> img);
+      //关闭
     void close();
 
     float getZoomSensitivity() const;
@@ -128,6 +130,7 @@ private :
 
     PrefetchThread* _prefetchthread;
 
+      //瓦片管理
     TileManager* _manager;
     unsigned long long _cacheSize;
     WSITileGraphicsItemCache* _cache;

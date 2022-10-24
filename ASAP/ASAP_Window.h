@@ -68,6 +68,7 @@ private:
   //共享库的扩展
   static const char* sharedLibraryExtensions;
   //多分辨率图像
+  //shared_ptr是一种智能指针（smart pointer），作用有如同指针，但会记录有多少个shared_ptrs共同指向一个对象。这便是所谓的引用计数（reference counting）。
   std::shared_ptr<MultiResolutionImage> _img;
   unsigned long long _cacheMaxByteSize;
   //QSettings使用户可以保存应用程序设置，并且支持用户自定义存储格式。
