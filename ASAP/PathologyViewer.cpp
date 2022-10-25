@@ -89,6 +89,7 @@ PathologyViewer::~PathologyViewer()
   close();
 }
 
+    //get cacheSize
 unsigned long long PathologyViewer::getCacheSize() {
   if (_cache) {
     return _cache->maxCacheSize();
@@ -98,12 +99,14 @@ unsigned long long PathologyViewer::getCacheSize() {
   }
 }
 
+    //set maxCacheSize
 void PathologyViewer::setCacheSize(unsigned long long& maxCacheSize) {
   if (_cache) {
     _cache->setMaxCacheSize(maxCacheSize);
   }
 }
 
+    //调整大小事件
 void PathologyViewer::resizeEvent(QResizeEvent *event) {
   QRect rect = QRect(QPoint(0, 0), event->size());
   QRectF FOV = this->mapToScene(rect).boundingRect();
@@ -115,10 +118,12 @@ void PathologyViewer::resizeEvent(QResizeEvent *event) {
     emit updateBBox(FOV);
   }
 }
-
+    //滚轮事件
 void PathologyViewer::wheelEvent(QWheelEvent *event) {
+    // >0放大 <0缩小
   int numDegrees = event->delta() / 8;
   int numSteps = numDegrees / 15;  // see QWheelEvent documentation
+
   _zoomToScenePos = this->mapToScene(event->pos());
   _zoomToViewPos = event->pos();
   zoom(numSteps);
@@ -227,7 +232,7 @@ void PathologyViewer::changeActiveTool() {
     }
   }
 }
-
+    //视野改变槽
 void PathologyViewer::onFieldOfViewChanged(const QRectF& FOV, const unsigned int level) {
   if (_manager) {
     _manager->loadTilesForFieldOfView(FOV, level);
@@ -331,7 +336,7 @@ float PathologyViewer::getForegroundOpacity() const {
   return _opacity;
 }
     
-  //初始化图像
+    //初始化图像
 void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize, unsigned int lastLevel) {  
   unsigned int nrLevels = _img->getNumberOfLevels();
   std::vector<unsigned long long> lastLevelDimensions = _img->getLevelDimensions(lastLevel);
@@ -352,7 +357,7 @@ void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize
   }
 }
     
-  //初始化GUI组件 传入的是最上的一层
+    //初始化GUI组件 传入的是最上的一层
 void PathologyViewer::initializeGUIComponents(unsigned int level) {
   // Initialize the minimap 初始化小地图
   std::vector<unsigned long long> overviewDimensions = _img->getLevelDimensions(level);
@@ -439,6 +444,8 @@ void PathologyViewer::initializeGUIComponents(unsigned int level) {
   }
 }
 
+
+    //！显示上下文菜单
 void PathologyViewer::showContextMenu(const QPoint& pos)
 {
   QPoint globalPos = this->mapToGlobal(pos);
@@ -478,7 +485,7 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
   }
 }
   
-  //关闭
+    //关闭
 void PathologyViewer::close() {
   if (this->window()) {
     QMenu* viewMenu = this->window()->findChild<QMenu*>("menuView");
@@ -535,14 +542,17 @@ void PathologyViewer::close() {
   }
   setEnabled(false);
 }
-
+    
+    //切换移动
 void PathologyViewer::togglePan(bool pan, const QPoint& startPos) {
   if (pan) {
     if (_pan) {
       return;
     }
+    
     _pan = true;
     _prevPan = startPos;
+    //光标形状
     setCursor(Qt::ClosedHandCursor);
   }
   else {
@@ -555,20 +565,27 @@ void PathologyViewer::togglePan(bool pan, const QPoint& startPos) {
   }
 }
 
+    //移动工具
 void PathologyViewer::pan(const QPoint& panTo) {
+    //水平滚动条
   QScrollBar *hBar = horizontalScrollBar();
+    //垂直滚动条
   QScrollBar *vBar = verticalScrollBar();
+    
   QPoint delta = panTo - _prevPan;
   _prevPan = panTo;
   hBar->setValue(hBar->value() + (isRightToLeft() ? delta.x() : -delta.x()));
   vBar->setValue(vBar->value() - delta.y());
+    //最大下采样
   float maxDownsample = 1. / this->_sceneScale;
+    //QGraphicsView.mapToScene(QWidget.rect).boundingRect()
+    //View坐标转换为Scene坐标,返回多边形的边界矩形，如果多边形为空，则返回QRectF(0,0,0,0)。
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
   emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()));
   emit updateBBox(FOV);
 }
-
+    //更新当前View
 void PathologyViewer::updateCurrentFieldOfView() {
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
@@ -577,6 +594,8 @@ void PathologyViewer::updateCurrentFieldOfView() {
   emit updateBBox(FOV);
 }
 
+
+    //鼠标按下事件
 void PathologyViewer::mousePressEvent(QMouseEvent *event)
 {
   if (event->button() == Qt::MiddleButton)
@@ -593,7 +612,7 @@ void PathologyViewer::mousePressEvent(QMouseEvent *event)
   }
   event->ignore();
 }
-
+    //鼠标释放事件
 void PathologyViewer::mouseReleaseEvent(QMouseEvent *event)
 {
   if (event->button() == Qt::MiddleButton)
@@ -610,7 +629,7 @@ void PathologyViewer::mouseReleaseEvent(QMouseEvent *event)
   }
   event->ignore();
 }
-
+    //鼠标移动事件
 void PathologyViewer::mouseMoveEvent(QMouseEvent *event)
 {
   QPointF imgLoc = this->mapToScene(event->pos()) / this->_sceneScale;
@@ -628,25 +647,27 @@ void PathologyViewer::mouseMoveEvent(QMouseEvent *event)
   }
   event->ignore();
 }
+    
 
+    //! 鼠标双击事件
 void PathologyViewer::mouseDoubleClickEvent(QMouseEvent *event) {
   event->ignore();
   if (_activeTool) {
     _activeTool->mouseDoubleClickEvent(event);
   }
 }
-
+    //! 键盘按下事件
 void PathologyViewer::keyPressEvent(QKeyEvent *event) {
   event->ignore();
   if (_activeTool) {
     _activeTool->keyPressEvent(event);
   }
 }
-
+    //! 是否在平移
 bool PathologyViewer::isPanning() {
   return _pan;
 }
-
+    //! 设置移动灵敏度
 void PathologyViewer::setPanSensitivity(float panSensitivity) {
       if (panSensitivity > 1) {
         _panSensitivity = 1;
@@ -656,11 +677,11 @@ void PathologyViewer::setPanSensitivity(float panSensitivity) {
         _panSensitivity = panSensitivity;
       }
     };
-
+    //! 获得移动灵敏度
 float PathologyViewer::getPanSensitivity() const {
   return _panSensitivity;
 };
-
+    //! 设置缩放灵敏度
 void PathologyViewer::setZoomSensitivity(float zoomSensitivity) {
       if (zoomSensitivity > 1) {
         _zoomSensitivity = 1;
@@ -670,7 +691,7 @@ void PathologyViewer::setZoomSensitivity(float zoomSensitivity) {
         _zoomSensitivity = zoomSensitivity;
       }
     };
-
+    //! 获得缩放灵敏度
 float PathologyViewer::getZoomSensitivity() const {
   return _zoomSensitivity;
 };

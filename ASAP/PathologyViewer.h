@@ -24,8 +24,9 @@ class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
     Q_OBJECT
     
 public:
-
+      // 缩放到Scene位置
     QPointF _zoomToScenePos;
+      //缩放到View位置
     QPointF _zoomToViewPos;
 
     PathologyViewer(QWidget *parent = 0);
@@ -92,6 +93,7 @@ private :
     // Functions for overviewmap
     void initializeGUIComponents(unsigned int level);
     void initializeImage(QGraphicsScene *scn, unsigned int tileSize, unsigned int lastLevel);
+        //场景比例
     float _sceneScale;
 
     // Interface to the multi-resolution image. Please note that PathologyViewer
