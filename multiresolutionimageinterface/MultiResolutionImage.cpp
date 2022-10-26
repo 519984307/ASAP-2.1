@@ -4,6 +4,7 @@
 using namespace pathology;
 
 // Subsequent specialization to not re-copy data when datatypes are the same
+//获得原始区域
 template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
   const unsigned long long& height, const unsigned int& level, float*& data) {
     if (level >= getNumberOfLevels()) {
@@ -84,7 +85,7 @@ template <> void MultiResolutionImage::getRawRegion(const long long& startX, con
       delete[] temp;
     }
 }
-
+    
 template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
   const unsigned long long& height, const unsigned int& level, unsigned int*& data) {
     if (level >= getNumberOfLevels()) {
@@ -123,22 +124,25 @@ MultiResolutionImage::MultiResolutionImage() :
   _numberOfZPlanes(1),
   _currentZPlaneIndex(0)
 {
+    //缓存互斥锁
   _cacheMutex.reset(new std::mutex());
+    //打开关闭互斥锁
   _openCloseMutex.reset(new std::shared_mutex());
 }
-
+    //获取Z平面的数量
 int MultiResolutionImage::getNumberOfZPlanes() const {
   return _numberOfZPlanes;
 }
+    //设置当前Z平面索引
 void MultiResolutionImage::setCurrentZPlaneIndex(const unsigned int& zPlaneIndex) {
   std::unique_lock<std::shared_mutex> l(*_openCloseMutex);
   zPlaneIndex < _numberOfZPlanes ? _currentZPlaneIndex = zPlaneIndex : _currentZPlaneIndex = _numberOfZPlanes - 1;
 }
-
+    //获取当前Z平面索引
 unsigned int MultiResolutionImage::getCurrentZPlaneIndex() const {
   return _currentZPlaneIndex;
 }
-
+    //获取层数
 const int MultiResolutionImage::getNumberOfLevels() const {
   if (_isValid) {
   return _numberOfLevels;
@@ -147,7 +151,8 @@ const int MultiResolutionImage::getNumberOfLevels() const {
     return -1;
   }
 }
-
+    
+    //得到文件类型
 const std::string MultiResolutionImage::getFileType() const {
   return _fileType;
 }
@@ -160,6 +165,7 @@ const std::vector<unsigned long long> MultiResolutionImage::getDimensions() cons
   return dims;
 }
 
+    //初始化
 bool MultiResolutionImage::initialize(const std::string& imagePath) {
   _filePath = imagePath;
   return initializeType(imagePath);

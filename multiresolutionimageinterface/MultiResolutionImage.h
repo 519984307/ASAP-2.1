@@ -13,54 +13,56 @@
 class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImage : public ImageSource {
 
 public :
+    //构造函数
   MultiResolutionImage();
+    //析构函数
   virtual ~MultiResolutionImage();
   ImageSource* clone();
 
-  //! Load the image, returns whether a valid image is obtained
+  //加载图像，返回是否获得有效的图像
   bool initialize(const std::string& imagePath);
 
-  //! Actually initialization implementataiton
+  //实际的初始化实现
   virtual bool initializeType(const std::string& imagePath) = 0;
 
-  //! Support for slides with multiple z-planes
+  //支持具有多个z平面的幻灯片
   int getNumberOfZPlanes() const;
   void setCurrentZPlaneIndex(const unsigned int& zPlaneIndex);
   unsigned int getCurrentZPlaneIndex() const;
 
-  //! Get a stored data property (e.g. objective magnification")
+  //获取存储的数据属性(例如目标放大)
   virtual std::string getProperty(const std::string& propertyName) { return std::string(); };
 
-  //! Gets/Sets the maximum size of the cache
+  //获取/设置缓存的最大值
   virtual const unsigned long long getCacheSize();
   virtual void setCacheSize(const unsigned long long cacheSize);
 
   //! Gets the number of levels in the slide pyramid
   virtual const int getNumberOfLevels() const;
   
-  //! Gets the dimensions of the level 0
+  //! 获取幻灯片金字塔中的层数
   virtual const std::vector<unsigned long long> getDimensions() const;
 
-  //! Gets the dimensions of the specified level of the pyramid
+  //! 获取金字塔的指定级别的尺寸
   virtual const std::vector<unsigned long long> getLevelDimensions(const unsigned int& level) const;
   
-  //! Get the downsampling factor of the given level relative to the base level
+  //得到给定水平相对于基本水平的下采样因子
   virtual const double getLevelDownsample(const unsigned int& level) const;
 
-  //! Gets the level corresponding to the closest downsample factor given the requested downsample factor
+  //在给定请求的下采样因子的情况下，获取与最近的下采样因子对应的级别
   virtual const int getBestLevelForDownSample(const double& downsample) const;
 
-  //! Gets the minimum value for a channel. If no channel is specified, default to the first channel
+  //获取通道的最小值。如果没有指定通道，默认为第一个通道
   virtual double getMinValue(int channel = -1) = 0;
   
-  //! Gets the maximum value for a channel. If no channel is specified, default to the first channel
+  //获取通道的最大值。如果没有指定通道，默认为第一个通道
   virtual double getMaxValue(int channel = -1) = 0;
 
-  //! Get the file type of the opened image
+  //获取打开图像的文件类型
   const std::string getFileType() const;
   
-  //! Obtains data as a patch, which is a basic image class containing all relevant information for further processing,
-  //! like data and colortype
+  // 获取作为补丁的数据，这是一个基本的图像类，包含所有相关的信息供进一步处理，
+  // 比如数据和颜色类型
   template <typename T> 
   Patch<T> getPatch(const long long& startX, const long long& startY, const unsigned long long& width,
     const unsigned long long& height, const unsigned int& level) 
@@ -86,9 +88,8 @@ public :
     return patch;
   }
 
-  //! Obtains pixel data for a requested region. The user is responsible for allocating
-  //! enough memory for the data to fit the array and clearing the memory. Please note that in case of int32 ARGB data,  
-  //! like in OpenSlide, the order of the colors depends on the endianness of your machine (Windows typically BGRA)
+  //获取请求区域的像素数据。用户负责分配足够的内存来容纳数据数组并清除内存。
+  //请注意，对于int32 ARGB数据，就像在OpenSlide中，颜色的顺序取决于你的机器的端序(Windows典型的BGRA)
   template <typename T> 
   void getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
     const unsigned long long& height, const unsigned int& level, T*& data) {
@@ -120,26 +121,26 @@ public :
 
 protected :
 
-  //! To make MultiResolutionImage thread-safe
+  //! To make MultiResolutionImage thread-safe  使MultiResolutionImage线程安全
   std::unique_ptr<std::shared_mutex> _openCloseMutex;
   std::unique_ptr<std::mutex> _cacheMutex;
   std::shared_ptr<void> _cache;
 
-  // Aditional properties of a multi-resolution image
+  // 多分辨率图像的附加属性
   std::vector<std::vector<unsigned long long> > _levelDimensions;
   unsigned int _numberOfLevels;
   unsigned int _numberOfZPlanes;
   unsigned int _currentZPlaneIndex;
 
-  // Properties of the loaded slide
+  // 已加载幻灯片的属性
   unsigned long long _cacheSize;
   std::string _fileType;
   std::string _filePath;
 
-  // Cleans up internals
+  // 清理内部
   virtual void cleanup();
 
-  // Reads the actual data from the image
+  // 从图像读取实际数据
   virtual void* readDataFromImage(const long long& startX, const long long& startY, const unsigned long long& width, 
     const unsigned long long& height, const unsigned int& level) = 0;
 

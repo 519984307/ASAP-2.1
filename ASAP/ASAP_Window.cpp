@@ -48,7 +48,7 @@ const char* ASAP_Window::sharedLibraryExtensions = ".so";
 #endif
 
 using namespace std;
-
+    //构造函数
 ASAP_Window::ASAP_Window(QWidget *parent) :
     QMainWindow(parent),
     _cacheMaxByteSize(1000*512*512*3),
@@ -106,7 +106,7 @@ void ASAP_Window::writeSettings()
   _settings->endGroup();
 }
 
-//读取设置
+    //读取设置
 void ASAP_Window::readSettings()
 {
   _settings->beginGroup("ASAP");
@@ -118,7 +118,7 @@ void ASAP_Window::readSettings()
   _settings->endGroup();
 }
 
-//加载插件
+    //加载插件
 void ASAP_Window::loadPlugins() {
   PathologyViewer* viewer = this->findChild<PathologyViewer*>("pathologyView");
   _pluginsDir = QDir(qApp->applicationDirPath());
@@ -212,7 +212,7 @@ void ASAP_Window::loadPlugins() {
   }
 }
 
-
+    //!键盘按下事件
 void ASAP_Window::keyPressEvent(QKeyEvent* event)
 {
     event->ignore();
@@ -224,16 +224,19 @@ void ASAP_Window::keyPressEvent(QKeyEvent* event)
     }
 }
 
+    //!关闭事件
 void ASAP_Window::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
+    //!析构函数（释放资源）
 ASAP_Window::~ASAP_Window()
 {
   on_actionClose_triggered();
   writeSettings();
 }
-
+    
+    //！关于事件点击
 void ASAP_Window::on_actionAbout_triggered() {
   QUiLoader loader;
   QFile file(":/ASAP_ui/aboutdialog.ui");
@@ -264,7 +267,7 @@ void ASAP_Window::on_actionAbout_triggered() {
   file.close();
 }
 
-//关闭事件点击
+    //关闭事件点击
 void ASAP_Window::on_actionClose_triggered()
 {
     for (std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> >::iterator it = _extensions.begin(); it != _extensions.end(); ++it) {
@@ -283,7 +286,7 @@ void ASAP_Window::on_actionClose_triggered()
     }
 }
 
-//打开文件（文件名，"default"）
+    //打开文件（文件名，"default"）
 void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) {
     //清除状态栏信息
   statusBar->clearMessage();
@@ -304,7 +307,7 @@ void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) 
     this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
       //创建多分辨率图像读取类
     MultiResolutionImageReader imgReader;
-
+    //p.reset(q.d);将p中内置指针换为q，并且用d来释放p之前所指的空间
     _img.reset(imgReader.open(fn, factoryName.toStdString()));
     if (_img) {
       if (_img->valid()) {
@@ -324,12 +327,14 @@ void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) 
   }
 }
 
+    //打开事件点击
 void ASAP_Window::on_actionOpen_triggered()
 { 
 	QList<QString> filename_factory = this->getFileNameAndFactory();
 	openFile(filename_factory[0], filename_factory[1] == "All supported types" ? "default": filename_factory[1]);
 }
-
+    
+    //获得文件名和工厂
 QList<QString> ASAP_Window::getFileNameAndFactory() {
 	QString filterList;
 	std::set<std::string> allExtensions = MultiResolutionImageFactory::getAllSupportedExtensions();
@@ -354,7 +359,8 @@ QList<QString> ASAP_Window::getFileNameAndFactory() {
 	QString selectedFactory = selectedFilter.split("(")[0].trimmed();
 	return QList<QString>({ fileName, selectedFactory });
 }
-
+    
+    //设置缓存大小
 void ASAP_Window::setCacheSize(const unsigned long long& cacheMaxByteSize) {
   PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
   if (view) {
@@ -362,6 +368,7 @@ void ASAP_Window::setCacheSize(const unsigned long long& cacheMaxByteSize) {
   }
 }
     
+    //获取缓存大小
 unsigned long long ASAP_Window::getCacheSize() const {
   PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
   if (view) {
@@ -372,7 +379,7 @@ unsigned long long ASAP_Window::getCacheSize() const {
   }
 }
 
-//界面
+    //界面
 void ASAP_Window::setupUi()
 {
   if (this->objectName().isEmpty()) {
@@ -455,7 +462,8 @@ void ASAP_Window::setupUi()
 
   this->setCentralWidget(centralWidget);
 }
-//重新翻译界面
+
+    //重新翻译界面
 void ASAP_Window::retranslateUi()
 {
   this->setWindowTitle(QString("ASAP v") + QString(ASAP_VERSION_STRING));
@@ -470,7 +478,8 @@ void ASAP_Window::retranslateUi()
   menuView->setTitle(QApplication::translate("PathologyWorkstation", "View", 0));
   menuHelp->setTitle(QApplication::translate("PathologyWorkstation", "Help", 0));
 } 
-
+    
+    //!显示快捷方式概述
 void ASAP_Window::showShortcutOverview() {
     auto actions = this->findChildren<QAction*>();
     for (QAction* action : actions) {

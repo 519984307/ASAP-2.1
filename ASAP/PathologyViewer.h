@@ -114,28 +114,26 @@ private :
     // Tools
     std::shared_ptr<ToolPluginInterface> _activeTool;
 
-    // Members to track panning and zooming
-    float _zoomSensitivity;
-    float _numScheduledScalings;
-    float _panSensitivity;
-    bool _pan;
+    // Members to track panning and zooming  跟踪平移和缩放的成员
+    float _zoomSensitivity; //缩放灵敏度
+    float _numScheduledScalings;  //预定缩放数
+    float _panSensitivity;  //移动灵敏度
+    bool _pan;  //bool移动
     QPoint _prevPan;
 
-    // Members related to rendering
+    // Members related to rendering 与显示相关的成员
     IOThread* _ioThread;
     int _backgroundChannel;
     int _foregroundChannel;
     float _opacity;
     std::string _LUTname;
     float _foregroundImageScale;
-    bool _renderForeground;
+    bool _renderForeground;  //显示前景
 
-    PrefetchThread* _prefetchthread;
-
-      //瓦片管理
-    TileManager* _manager;
-    unsigned long long _cacheSize;
-    WSITileGraphicsItemCache* _cache;
+    PrefetchThread* _prefetchthread;   
+    TileManager* _manager;  //瓦片管理
+    unsigned long long _cacheSize;  //缓存大小
+    WSITileGraphicsItemCache* _cache;  //缓存
 
     std::map<std::string, std::shared_ptr<ToolPluginInterface> > _tools;
 

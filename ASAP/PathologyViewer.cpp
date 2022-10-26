@@ -29,7 +29,7 @@
 #include "IOWorker.h"
 
 using std::vector;
-
+    //构造函数
 PathologyViewer::PathologyViewer(QWidget *parent):
   QGraphicsView(parent),
   _ioThread(NULL),
@@ -48,34 +48,53 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   _scaleBar(NULL),
   _renderForeground(true)
 {
+    //此属性保存水平滚动条的策略：从不显示滚动条
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //此属性保存垂直滚动条的策略：从不显示滚动条
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //视图中心的场景点被用作锚点。
   setResizeAnchor(QGraphicsView::ViewportAnchor::AnchorViewCenter);
+    //设置视图的拖拽模式：没有任何反应，鼠标事件将被忽略
   setDragMode(QGraphicsView::DragMode::NoDrag);
+    //设置小部件内容周围的空白
   setContentsMargins(0,0,0,0);
+    //设置自动填充背景
   setAutoFillBackground(true);
 //  setViewport(new QGLWidget());
+    // 当场景的任何可见部分发生变化或被重新暴露时，QGraphicsView将更新整个视口。
   setViewportUpdateMode(ViewportUpdateMode::FullViewportUpdate);
+
+    //此属性保存视图是否允许场景交互。
   setInteractive(false);
   this->setScene(new QGraphicsScene); //Memleak!
+    //设置背景画笔
   this->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
-    //场景
+    //场景画笔
   this->scene()->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
+    //小部件如何显示上下文菜单
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
           this, SLOT(showContextMenu(const QPoint&)));
+
+
   _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
   _settings->beginGroup("ASAP");
-  if (this->window()) {
+    //View菜单
+  if (this->window()) {  //QWidget.window()
+        //View菜单
     QMenu* viewMenu = this->window()->findChild<QMenu*>("menuView");
     QAction* action;
+        //设置菜单栏View
     if (viewMenu) {
+        //比例尺切换
       action = viewMenu->addAction("Toggle scale bar");
       action->setCheckable(true);
       action->setChecked(_settings->value("scaleBarToggled", true).toBool());
+        //覆盖视图切换
       action = viewMenu->addAction("Toggle coverage view");
       action->setCheckable(true);
       action->setChecked(_settings->value("coverageViewToggled", true).toBool());
+        //小地图切换
       action = viewMenu->addAction("Toggle mini-map");
       action->setCheckable(true);
       action->setChecked(_settings->value("miniMapToggled", true).toBool());
@@ -84,12 +103,13 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   _settings->endGroup();
 }
 
+    //析构函数
 PathologyViewer::~PathologyViewer()
 {
   close();
 }
 
-    //get cacheSize
+    //!get cacheSize
 unsigned long long PathologyViewer::getCacheSize() {
   if (_cache) {
     return _cache->maxCacheSize();
@@ -99,7 +119,7 @@ unsigned long long PathologyViewer::getCacheSize() {
   }
 }
 
-    //set maxCacheSize
+    //!set maxCacheSize
 void PathologyViewer::setCacheSize(unsigned long long& maxCacheSize) {
   if (_cache) {
     _cache->setMaxCacheSize(maxCacheSize);
@@ -118,6 +138,7 @@ void PathologyViewer::resizeEvent(QResizeEvent *event) {
     emit updateBBox(FOV);
   }
 }
+    
     //滚轮事件
 void PathologyViewer::wheelEvent(QWheelEvent *event) {
     // >0放大 <0缩小
@@ -129,7 +150,9 @@ void PathologyViewer::wheelEvent(QWheelEvent *event) {
   zoom(numSteps);
 }
 
+    //缩放 （滚轮事件调用）
 void PathologyViewer::zoom(float numSteps) {
+    //图片不存在return
   if (!_img) {
     return;
   }
@@ -177,7 +200,8 @@ void PathologyViewer::zoomFinished()
     _numScheduledScalings++;
   sender()->~QObject();
 }
-
+    
+    //根据坐标移动
 void PathologyViewer::moveTo(const QPointF& pos) {
   this->centerOn(pos);
   float maxDownsample = 1. / this->_sceneScale;
@@ -187,6 +211,7 @@ void PathologyViewer::moveTo(const QPointF& pos) {
   emit updateBBox(FOV);
 }
 
+    //添加工具
 void PathologyViewer::addTool(std::shared_ptr<ToolPluginInterface> tool) {
   if (tool) {
     _tools[tool->name()] = tool;
@@ -239,7 +264,7 @@ void PathologyViewer::onFieldOfViewChanged(const QRectF& FOV, const unsigned int
   }
 }
 
-  //初始化
+  //*初始化
 void PathologyViewer::initialize(std::shared_ptr<MultiResolutionImage> img) {
     //先执行关闭
   close();
@@ -293,6 +318,7 @@ void PathologyViewer::initialize(std::shared_ptr<MultiResolutionImage> img) {
   emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()));
 }
 
+    //前景图像改变
 void PathologyViewer::onForegroundImageChanged(std::weak_ptr<MultiResolutionImage> for_img, float scale) {
   _for_img = for_img;
   if (_ioThread) {

@@ -14,7 +14,7 @@
 
 bool MultiResolutionImageFactory::_externalFormatsRegistered = false;
 std::set<std::string> MultiResolutionImageFactory::_allSupportedExtensions;
-
+    //×¢²á±í
 MultiResolutionImageFactory::FactoryMap& MultiResolutionImageFactory::registry() {
   static FactoryMap typeRegistry;
   return typeRegistry;
