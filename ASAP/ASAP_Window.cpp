@@ -121,22 +121,32 @@ void ASAP_Window::readSettings()
     //加载插件
 void ASAP_Window::loadPlugins() {
   PathologyViewer* viewer = this->findChild<PathologyViewer*>("pathologyView");
+    //获得的目录路径是可执行文件所在目录
   _pluginsDir = QDir(qApp->applicationDirPath());
+    //目录下存在plugins文件夹
   if (_pluginsDir.cd("plugins")) {
+      //目录下存在tools文件夹 pan和zoom工具
     if (_pluginsDir.cd("tools")) {
+        //循环
       foreach(QString fileName, _pluginsDir.entryList(QDir::Files)) {
+          //QString.toLower() 返回字符串的小写字母 endWith如果字符串以s结尾返回true;否则返回false。
         if (fileName.toLower().endsWith(sharedLibraryExtensions)) {
+            //绝对路径
           QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));
+            //加载插件
           QObject *plugin = loader.instance();
+            
           if (plugin) {
             std::shared_ptr<ToolPluginInterface> tool(qobject_cast<ToolPluginInterface*>(plugin));
             if (tool) {
               tool->setViewer(viewer);
+                //事件
               QAction* toolAction = tool->getToolButton();
               connect(toolAction, SIGNAL(triggered(bool)), viewer, SLOT(changeActiveTool()));
               _toolPluginFileNames.push_back(fileName.toStdString());
               viewer->addTool(tool);
               QToolBar* mainToolBar = this->findChild<QToolBar *>("mainToolBar");
+                //设置可见
               toolAction->setCheckable(true);
               _toolActions->addAction(toolAction);
               mainToolBar->addAction(toolAction);
@@ -146,6 +156,7 @@ void ASAP_Window::loadPlugins() {
       }
       _pluginsDir.cdUp();
     }
+        //目录下workstationextension文件夹 AnnotationPlugin、FilterWorkstationExtensionPlugin、VisualizationWorkstationExtensionPlugin工具
     if (_pluginsDir.cd("workstationextension")) {
       QDockWidget* lastDockWidget = NULL;
       QDockWidget* firstDockWidget = NULL;

@@ -3,6 +3,7 @@
 
 #include "interfaces/interfaces.h"
 
+	//ÒÆ¶¯¹¤¾ß
 class PanTool : public  ToolPluginInterface {
   Q_OBJECT
   Q_PLUGIN_METADATA(IID "ASAP.PanTool/1.0")

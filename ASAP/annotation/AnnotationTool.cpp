@@ -19,7 +19,8 @@ _moveStart(-1, -1)
 {
   _viewer = viewer;
 }
-
+    
+    //鼠标移动事件
 void AnnotationTool::mouseMoveEvent(QMouseEvent *event) {
   if (_viewer) {
     if (_generating) {
@@ -55,9 +56,10 @@ void AnnotationTool::mouseMoveEvent(QMouseEvent *event) {
   }
 }
 
+    //双击
 void AnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
 }
-
+    //键盘按下
 void AnnotationTool::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key::Key_Escape) {
     cancelAnnotation();
@@ -112,7 +114,8 @@ void AnnotationTool::keyPressEvent(QKeyEvent *event) {
     }
   }
 }
-
+    
+    //设置状态
 void AnnotationTool::setActive(bool active) {
   if (!active) {
     if (_generating) {
@@ -121,7 +124,8 @@ void AnnotationTool::setActive(bool active) {
   }
   _active = active;
 }
-
+    
+    //取消标注
 void AnnotationTool::cancelAnnotation() {
   if (_generating) {
     _annotationPlugin->finishAnnotation(true);
@@ -131,6 +135,7 @@ void AnnotationTool::cancelAnnotation() {
   }
 }
 
+    //鼠标按下
 void AnnotationTool::mousePressEvent(QMouseEvent *event) {
   if (_viewer) {
     QPointF scenePos = _viewer->mapToScene(event->pos());
@@ -190,6 +195,7 @@ void AnnotationTool::mousePressEvent(QMouseEvent *event) {
   }
 }
 
+    //添加坐标
 void AnnotationTool::addCoordinate(const QPointF& scenePos) {
   if (_annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinates().size() > 2 && QLineF(_viewer->mapFromScene(QPointF(_start.getX(), _start.getY())), _viewer->mapFromScene(scenePos)).length() < 12) {
     _annotationPlugin->finishAnnotation();
@@ -203,6 +209,7 @@ void AnnotationTool::addCoordinate(const QPointF& scenePos) {
   }
 }
 
+    //鼠标释放
 void AnnotationTool::mouseReleaseEvent(QMouseEvent *event) {
   if (_viewer) {
     if (_startSelectionMove) {

@@ -24,6 +24,7 @@ class QMenu;
 class ProgressMonitor;
 class MultiResolutionImage;
 
+    //图像过滤器插件接口
 class ImageFilterPluginInterface : public QObject
 {
 
@@ -74,6 +75,7 @@ protected:
     QMutex _mutex;
 };
 
+    //工具插件接口
 class ToolPluginInterface : public QObject {
 public:
   ToolPluginInterface() : _button(NULL), _viewer(NULL), _active(false)
@@ -104,6 +106,7 @@ protected :
   bool _active;
 };
 
+    //工作站扩展插件接口
 class WorkstationExtensionPluginInterface : public QObject {
 public :
   WorkstationExtensionPluginInterface() : _settings(NULL) {}
